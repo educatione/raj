@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ta" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmonic Trader Raj | தமிழ் ஹார்மோனிக் ட்ரேடர்</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#0B192C',
+                            900: '#030E1E',
+                        },
+                        gold: {
+                            400: '#FFB800',
+                            500: '#F5A623',
+                            600: '#E09200',
+                        },
+                        brandTeal: '#0088CC',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Tamil', 'sans-serif'],
+                        tamil: ['Noto Sans Tamil', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts for English and Tamil -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Graph paper grid background pattern matching the reference image */
+        .bg-grid-pattern {
+            background-color: #f2f7fb;
+            background-image: 
+                linear-gradient(to right, rgba(180, 205, 230, 0.35) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(180, 205, 230, 0.35) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Marker highlighter styling matching yellow boxes in screenshot */
+        .highlight-yellow {
+            background-color: #fef08a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(250, 204, 21, 0.3);
+            display: inline-block;
+        }
+
+        /* Draggable item cursor styling */
+        .draggable-element {
+            touch-action: none;
+            user-select: none;
+            transition: transform 0.15s cubic-bezier(0.2, 0, 0.1, 1), box-shadow 0.15s ease;
+            will-change: transform;
+            cursor: grab;
+        }
+        .draggable-element:active {
+            cursor: grabbing;
+            z-index: 50 !important;
+        }
+        .draggable-element.is-dragging {
+            opacity: 0.95;
+            box-shadow: 0 20px 30px -10px rgba(11, 25, 44, 0.3);
+            transition: none !important;
+        }
+
+        /* Telegram CTA Gradient button glow */
+        .cta-btn-gradient {
+            background: linear-gradient(135deg, #072a4a 0%, #0066a2 50%, #0088cc 100%);
+            box-shadow: 0 10px 25px -5px rgba(0, 136, 204, 0.4), 0 0 0 2px rgba(245, 166, 35, 0.6);
+        }
+
+        /* Sparkle animation */
+        @keyframes floatSparkle {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-5px) scale(1.2); opacity: 1; }
+        }
+        .animate-sparkle {
+            animation: floatSparkle 3s ease-in-out infinite;
+        }
+
+        /* Pulse glow for main card */
+        .card-glow {
+            box-shadow: 0 15px 35px -10px rgba(0, 102, 162, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+        }
+    </style>
+</head>
+<body class="bg-grid-pattern font-sans min-h-screen text-slate-800 antialiased flex flex-col justify-between items-center p-3 sm:p-6 select-none overflow-x-hidden">
+
+    <!-- Top floating instruction & controls bar -->
+    <header class="w-full max-w-md mb-4 flex items-center justify-between bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full border border-blue-100 shadow-sm z-30">
+        <div class="flex items-center space-x-2 text-xs font-semibold text-slate-600">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>✨ Interactive Mode</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button id="toggleDragModeBtn" onclick="toggleDragMode()" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium transition-colors border border-blue-200">
+                Mode: <span id="modeText">Snap Back</span>
+            </button>
+            <button onclick="resetAllPositions()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium transition-colors" title="Reset element layout">
+                🔄 Reset
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-md flex flex-col gap-4 relative z-10 my-auto">
+
+        <!-- Elevated Main Profile & Header Card -->
+        <div id="mainCard" class="draggable-element bg-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-100 card-glow relative overflow-hidden flex flex-col items-center">
+            
+            <!-- Background Radial Glow behind harmonic graph -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-72 bg-sky-100/60 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+            <!-- Top Row Badges -->
+            <div class="w-full flex justify-between items-center mb-2 z-10">
+                <!-- Telegram Badge Left -->
+                <div class="draggable-element inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold tracking-wider uppercase shadow-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>TELEGRAM</span>
+                </div>
+
+                <!-- Tamil Badge Right -->
+                <div class="draggable-element inline-flex items-center px-3.5 py-1 rounded-full bg-orange-50 border border-orange-200 text-amber-800 text-xs font-bold font-tamil shadow-xs">
+                    <span>தமிழ்</span>
+                </div>
+            </div>
+
+            <!-- Harmonic Pattern & Profile Centerpiece Container -->
+            <div class="relative w-full flex items-center justify-center my-2 py-4">
+                
+                <!-- Harmonic Pattern SVG Diagram (X-A-B-C-D pattern behind avatar) -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 360 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Left Wing Triangle X-A-B -->
+                    <path d="M 35 110 L 95 30 L 140 85" stroke="#0088CC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right Wing Triangle B-C-D -->
+                    <path d="M 140 85 L 225 40 L 325 115" stroke="#0088CC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    
+                    <!-- Dashed Fibonacci Lines -->
+                    <line x1="35" y1="110" x2="140" y2="85" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="4 3" />
+                    <line x1="225" y1="40" x2="325" y2="115" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="4 3" />
+
+                    <!-- Pattern Nodes (Circles) -->
+                    <circle cx="35" cy="110" r="5" fill="#FFFFFF" stroke="#0088CC" stroke-width="2.5" />
+                    <circle cx="95" cy="30" r="5" fill="#FFFFFF" stroke="#0088CC" stroke-width="2.5" />
+                    <circle cx="225" cy="40" r="5" fill="#FFFFFF" stroke="#0088CC" stroke-width="2.5" />
+                    <circle cx="325" cy="115" r="5" fill="#FFFFFF" stroke="#0088CC" stroke-width="2.5" />
+
+                    <!-- Node Labels -->
+                    <text x="28" y="128" fill="#0088CC" font-size="12" font-weight="bold" font-family="sans-serif">X</text>
+                    <text x="92" y="18" fill="#0088CC" font-size="12" font-weight="bold" font-family="sans-serif">A</text>
+                    <text x="222" y="28" fill="#0088CC" font-size="12" font-weight="bold" font-family="sans-serif">C</text>
+                    <text x="322" y="132" fill="#0088CC" font-size="12" font-weight="bold" font-family="sans-serif">D</text>
+
+                    <!-- Ratio Numbers -->
+                    <text x="62" y="85" fill="#F5A623" font-size="11" font-weight="700" font-family="sans-serif">0.618</text>
+                    <text x="260" y="98" fill="#F5A623" font-size="11" font-weight="700" font-family="sans-serif">0.786</text>
+                </svg>
+
+                <!-- Profile Circular Ring Avatar -->
+                <div class="relative z-10 my-1 group">
+                    <!-- Multi-color Gradient Border Ring -->
+                    <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full p-1 bg-gradient-to-tr from-sky-400 via-emerald-400 to-amber-400 shadow-xl transition-transform duration-300 group-hover:scale-105">
+                        <div class="w-full h-full rounded-full p-1 bg-white">
+                            <!-- Inner chart profile image -->
+                            <div class="w-full h-full rounded-full overflow-hidden bg-slate-900 relative">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" 
+                                     alt="Harmonic Trader Raj" 
+                                     onerror="this.onerror=null; this.src='https://placehold.co/400x400/0b192c/ffffff?text=Raj+Trader';"
+                                     class="w-full h-full object-cover object-top filter brightness-105 contrast-105" />
+                                <!-- Chart overlay tint -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-navy-900/60 via-transparent to-transparent pointer-events-none"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verified Blue Checkmark Badge -->
+                    <div class="absolute bottom-2 right-2 bg-sky-500 text-white rounded-full p-1.5 shadow-md border-2 border-white flex items-center justify-center transform translate-x-1 translate-y-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Main Heading & Title Section -->
+            <div class="text-center mt-1 mb-3">
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-wider uppercase font-sans">
+                    HARMONIC TRADER
+                </h1>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-amber-500 tracking-widest mt-0.5">
+                    RAJ
+                </h2>
+                <p class="text-sky-700 font-semibold text-sm sm:text-base font-tamil mt-2">
+                    தமிழ் ஹார்மோனிக் ட்ரேடர்
+                </p>
+            </div>
+
+            <!-- Headline in Tamil with highlight boxes -->
+            <div class="text-center mb-6 px-2">
+                <p class="text-lg sm:text-xl font-black text-slate-800 leading-relaxed font-tamil">
+                    பங்குச் சந்தையை <span class="highlight-yellow">எளிய</span> <span class="highlight-yellow">தமிழில்</span> <span class="highlight-yellow">கற்றுக்கொள்ளுங்கள்</span>
+                </p>
+            </div>
+
+            <!-- Primary CTA Button (Draggable & Clickable) -->
+            <div class="w-full relative px-1">
+                <!-- Floating sparkle graphics -->
+                <div class="absolute -top-3 left-4 text-amber-400 animate-sparkle pointer-events-none">✦</div>
+                <div class="absolute -bottom-2 right-6 text-sky-300 animate-sparkle pointer-events-none" style="animation-delay: 1.5s;">✨</div>
+
+                <a href="https://t.me/" target="_blank" id="telegramBtn" class="draggable-element w-full flex items-center justify-center space-x-3 cta-btn-gradient text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg tracking-wide shadow-lg hover:brightness-110 active:scale-98 transition-all group">
+                    <span class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sky-600 shadow-sm transform group-hover:rotate-12 transition-transform">
+                        <!-- Telegram Icon -->
+                        <svg class="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 6.63 5.37 12 12 12s12-5.37 12-12C24 5.37 18.63 0 12 0zm5.56 8.16l-1.97 9.28c-.15.67-.54.83-1.1.52l-3.02-2.23-1.46 1.4c-.16.16-.3.3-.61.3l.21-3.09 5.62-5.07c.24-.22-.05-.34-.37-.13l-6.95 4.37-3-.94c-.65-.2-.66-.65.14-.97l11.72-4.52c.54-.2 1.02.13.8 1.08z"/>
+                        </svg>
+                    </span>
+                    <span>JOIN TELGRAM CHANNEL</span>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- 2x2 Feature Cards Grid (Draggable cards) -->
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 w-full">
+            
+            <!-- Card 1: Harmonic Patterns -->
+            <div class="draggable-element bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex items-center space-x-3">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shrink-0">
+                    <!-- Triangular ruler icon -->
+                    <svg class="w-6 h-6 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 22h20L2 2v20z"/>
+                        <path d="M6 18h2"/>
+                        <path d="M6 14h4"/>
+                        <path d="M6 10h2"/>
+                        <path d="M6 6h6"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-xs sm:text-sm font-tamil leading-snug">
+                        ஹார்மோனிக் பேட்டர்ன்கள்
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Card 2: Fibonacci Calculation -->
+            <div class="draggable-element bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex items-center space-x-3">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 shrink-0">
+                    <!-- Fibonacci Spiral / Vortex Icon -->
+                    <svg class="w-6 h-6 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 12a3 3 0 1 0 3 3"/>
+                        <path d="M15 15a6 6 0 1 0-6-6"/>
+                        <path d="M9 9a9 9 0 1 0 9 9"/>
+                        <path d="M18 18a12 12 0 1 0-12-12"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-xs sm:text-sm font-tamil leading-snug">
+                        ஃபிபோனச்சி கணக்கீடு
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Card 3: Market Analysis -->
+            <div class="draggable-element bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex items-center space-x-3">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 shrink-0">
+                    <!-- Bar chart icon -->
+                    <svg class="w-6 h-6 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-xs sm:text-sm font-tamil leading-snug">
+                        சந்தை பகுப்பாய்வு
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Card 4: Risk Management -->
+            <div class="draggable-element bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex items-center space-x-3">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+                    <!-- Shield icon -->
+                    <svg class="w-6 h-6 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-xs sm:text-sm font-tamil leading-snug">
+                        ரிஸ்க் மேலாண்மை
+                    </h3>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Bottom Disclaimer Section -->
+    <footer class="w-full max-w-md text-center my-4 px-3">
+        <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-sans font-normal">
+            <strong class="font-semibold text-slate-700">Disclaimer:</strong> For educational purposes only. Not SEBI registered; no investment advice. Trading involves market risk. <span class="font-tamil">இது கல்வி நோக்கத்திற்காக மட்டுமே.</span>
+        </p>
+    </footer>
+
+    <!-- Interactive Movable Elements Script -->
+    <script>
+        // Store state for interactive drag physics
+        let dragMode = 'snap'; // 'snap' or 'free'
+
+        function toggleDragMode() {
+            dragMode = dragMode === 'snap' ? 'free' : 'snap';
+            document.getElementById('modeText').innerText = dragMode === 'snap' ? 'Snap Back' : 'Free Drag';
+        }
+
+        function resetAllPositions() {
+            document.querySelectorAll('.draggable-element').forEach(el => {
+                el.style.transform = 'translate3d(0px, 0px, 0px)';
+            });
+        }
+
+        // Initialize drag event handlers on all draggable elements
+        document.querySelectorAll('.draggable-element').forEach(element => {
+            let isDragging = false;
+            let currentX = 0;
+            let currentY = 0;
+            let initialX = 0;
+            let initialY = 0;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            element.addEventListener('touchstart', dragStart, { passive: false });
+            element.addEventListener('touchend', dragEnd, { passive: false });
+            element.addEventListener('touchmove', drag, { passive: false });
+
+            element.addEventListener('mousedown', dragStart);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mousemove', drag);
+
+            function dragStart(e) {
+                if (e.target.closest('a') && dragMode === 'snap') {
+                    // allow link click if quick tap
+                }
+                
+                if (e.type === "touchstart") {
+                    initialX = e.touches[0].clientX - xOffset;
+                    initialY = e.touches[0].clientY - yOffset;
+                } else {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+
+                if (e.target === element || element.contains(e.target)) {
+                    isDragging = true;
+                    element.classList.add('is-dragging');
+                }
+            }
+
+            function dragEnd(e) {
+                if (!isDragging) return;
+                
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                element.classList.remove('is-dragging');
+
+                if (dragMode === 'snap') {
+                    // Smooth bounce snap back to origin grid
+                    xOffset = 0;
+                    yOffset = 0;
+                    currentX = 0;
+                    currentY = 0;
+                    element.style.transform = 'translate3d(0px, 0px, 0px)';
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    
+                    if (e.type === "touchmove") {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+
+                    xOffset = currentX;
+                    yOffset = currentY;
+
+                    element.style.transform = `translate3d(${currentX}px, ${currentY}px, 0px)`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
